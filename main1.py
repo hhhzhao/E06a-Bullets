@@ -20,6 +20,9 @@ ENEMY_HP = 100
 HIT_SCORE = 10
 KILL_SCORE = 100
 
+GAME_RUNNING=0
+GAME_END=1
+
 class Bullet(arcade.Sprite):
     def __init__(self, position, velocity, damage):
         ''' 
@@ -74,6 +77,8 @@ class Window(arcade.Window):
         self.enemy_list = arcade.SpriteList()
         self.player = Player()
         self.score = 0
+        self.enemy_list_hp={}
+        self.status=GAME_RUNNING
 
     def setup(self):
         '''
@@ -83,37 +88,53 @@ class Window(arcade.Window):
             x = 120 * (i+1) + 40
             y = 500
             enemy = Enemy((x,y))
+            self.enemy_hp=enemy.hp           
+            self.enemy_list_hp[enemy]=self.enemy_hp
             self.enemy_list.append(enemy)            
+        
 
     def update(self, delta_time):
         self.bullet_list.update()
-        self.hp=ENEMY_HP
-        for e in self.enemy_list:
+        
+        for e in self.enemy_list:  
             for i in self.bullet_list:
                 hit=arcade.check_for_collision_with_list(i,self.enemy_list)
                 if len(hit)>0:
                     i.kill()
-                for b in hit:
                     self.score+=HIT_SCORE
-            
-                    if self.hp==0:
-                        e.kill()
-                        
-        
+                    for b in hit:
+                        self.enemy_list_hp[b]-=HIT_SCORE
+                        if int(self.enemy_list_hp[b])==0:
+                            b.kill()
+                            del self.enemy_list_hp[b]
+                            #if there is no enemy in the list, the game will end 
+                            if bool(self.enemy_list_hp) is False:
+                                self.status=GAME_END                                               
             # check for collision
             # for every bullet that hits, decrease the hp and then see if it dies
             # increase the score
             # e.kill() will remove the enemy sprite from the game
             # the pass statement is a placeholder. Remove line 81 when you add your code
-            
-
+    #Game Over Screen        
+    def draw_game_over(self):
+        """
+        Draw "Game over" across the screen.
+        """
+        output = "Game Over"
+        arcade.draw_text(output, 400, 200, arcade.color.BLACK, 54)
+        #display the score
+        output_2 = "Score: "+str(self.score)
+        arcade.draw_text(output_2, 400, 150, arcade.color.BLACK, 45)
     def on_draw(self):
         arcade.start_render()
-        arcade.draw_text(str(self.score), 20, SCREEN_HEIGHT - 40, open_color.white, 16)
-        self.player.draw()
-        self.bullet_list.draw()
-        self.enemy_list.draw()
-
+        #if the status is running, the game will run, if the game end, it will switch to the gameover screen
+        if self.status==GAME_RUNNING:
+            arcade.draw_text(str(self.score), 20, SCREEN_HEIGHT - 40, open_color.white, 16)
+            self.player.draw()
+            self.bullet_list.draw()
+            self.enemy_list.draw()
+        if self.status == GAME_END:
+            self.draw_game_over()
     def on_mouse_motion(self, x, y, dx, dy):
         '''
         The player moves left and right with the mouse
@@ -126,6 +147,9 @@ class Window(arcade.Window):
             y = self.player.center_y + 15
             bullet = Bullet((x,y),(0,10),BULLET_DAMAGE)
             self.bullet_list.append(bullet)
+    
+    
+    
 
 
 def main():

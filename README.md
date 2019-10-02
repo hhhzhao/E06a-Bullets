@@ -1,4 +1,6 @@
 # E06a-Bullets
+Hello everyone, my name is Hua Zhao. For the game, I have added bullet to the player. When the enemy rich to the kill score, the hitted enemy will dispear. I also added the game over screen to the game. When all enemy gone, the gameover screen will display. Enjoy the game!!
+
 Playing with bullet sprites:
 
 It's narwhals vs. penguins(?)! These natural enemies are locked in a battle; who will survive?
